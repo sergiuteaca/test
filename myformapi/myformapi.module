@@ -1,0 +1,78 @@
+<?php
+
+//**************************************************
+//Page info
+/*
+ *
+ */function myformapi_menu()
+{
+    $items['myform'] = array(
+        'title' => 'My Page 7',
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array('myformapi_form'),
+        'access arguments' => array('access content')
+    );
+    return $items;
+}
+
+function myformapi_form()
+{
+    $form['site_name'] = array(
+        '#type' => 'textfield',
+        '#title' => t('My New New Site name'),
+        '#default_value' => variable_get('site_name', 'localhost'),
+        '#minlength' => '2',
+        //'#required' => TRUE,
+        '#validate' => 'myformapi_form_validate',
+    );
+    dpm(system_settings_form($form));
+
+//    return system_settings_form($form);
+}
+
+
+function myformapi_form_validate($form, &$form_state)
+{
+    if (strlen($form_state['values']['site_name'] < 3 )) {
+        form_set_error('site_name', t('Si fashi wai, e gresheala.'));
+    }
+}
+
+/****************************************
+*
+*****************************************/
+
+function myformapi_form_alter(&$form, &$form_state, $form_id){
+    if ($form_id == 'system_site_information_settings'){
+        $form['mainten'] = array(
+            '#type' => 'fieldset',
+            '#title' => t('Modul de metenanta'),
+            '#weight' => 10,
+            '#collapsible' => FALSE,
+            '#collapsed' => FALSE,
+        );
+        $form['mainten']['maintenance_mode'] = array(
+            '#type' => 'checkbox',
+            '#title' => t('Send me a copy.'),
+            '#default_value' => variable_get('maintenance_mode', 0),
+        );
+
+        $form['mainten']['maintenance_mode'] = array(
+            '#type' => 'select',
+            '#title' => t('Put site in maintenance mode?'),
+            '#options' => array(
+                0 => t('No'),
+                1 => t('Yes'),
+            ),
+            '#default_value' => variable_get('maintenance_mode', 0),
+            '#description' => t('Set this to <em>Yes</em> if you would like site in maintenance mode.'),
+        );
+        $form['mainten']['maintenance_mode_message'] = array(
+            '#title' => t('Mesajul de metenanta'),
+            '#type' => 'textarea',
+            '#default_value' => variable_get('maintenance_mode_message', t('@site is currently under maintenance. We should be back shortly. Thank you for your patience.', array('@site' => variable_get('site_name', 'Drupal')))),
+        );
+    }
+    //dpm($form,'La sfirsit');
+    return system_settings_form($form);
+}

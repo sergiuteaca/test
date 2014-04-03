@@ -1,0 +1,32 @@
+<?php
+
+//**************************************************
+//Page info
+//**************************************************
+
+
+function maintenance_mode2_alter(&$form, &$form_state, $formid){
+    dpm($formid);
+
+        if ($formid == 'system_site_information_settings'){
+            $form['mainten'] = array(
+                '#type' => 'fieldset',
+                '#title' => t('Hello'),
+                '#weight' => 10,
+                '#collapsible' => TRUE,
+                '#collapsed' => FALSE,
+            );
+            $form['mainten']['check'] = array(
+                '#type' => 'checkboxes',
+                '#title' => t('Chiar vrei sa stingi site-ul?'),
+                '#require' => TRUE,
+                '#default_value' => variable_get('maintenance_mode',0)
+            );
+            //return system_settings_form($form);
+            $form['mainten']['textarea'] = array(
+                '#title' => t('Mesajul de metenanta'),
+                '#type' => 'textarea',
+                '#description' => t('Site is currently under maintenance. We should be back shortly. Thank you for your patience.'),
+            );
+        }
+}

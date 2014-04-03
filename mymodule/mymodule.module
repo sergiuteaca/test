@@ -1,0 +1,69 @@
+<?php
+//**************************************************
+//Page info
+function mymodule_menu() {
+    $items['mypage'] = array(   //mypage e adresa scrisa in url
+        'title' => 'My Page',
+        'page callback' => 'mypage_page',   //numele functiei care o chemam
+      //  'page arguments' => array(1),       //pentru a lua argumentul de pe locul 2 din ulr path  ( node / % )
+        //'access callback'=> 'user_access'   //accesul utilizatorilor
+        'access arguments' => array('access mymodule'),   //setarea permisiunilor din People -> Permissions
+
+     );
+    return $items;
+}
+
+//****************************************************
+//Page function
+function mypage_page() {
+if (user_is_logged_in() == TRUE) {
+    global $user;
+
+    return 'Welcome ' . $user->name;
+}
+else {
+    return 'Please log in.';
+}
+}
+
+
+//*****************************
+//Block Info
+
+function mymodule_block_info() {
+  $blocks['mymodule_block'] = array(
+    'info' => t('Hello block'),
+    'cache' => DRUPAL_CACHE_PER_ROLE,
+  );
+  return $blocks;
+}
+
+//****************************
+//Block function
+function mymodule_block_view($delta = '') {
+  // Add your content here and write it to $content
+    global $user;
+  
+  $block['subject'] = t('Wellcome');
+  if (user_is_logged_in() == TRUE) {
+     $content = t('Hello '. $user->name);
+     $block['content'] = $content;
+     }
+else {
+     $block['content'] = t('Login, you piece of shit');
+}
+
+  return $block;
+}
+
+/*
+*Implimentig hook_permision
+*/
+function mymodule_permission() {
+  return array(
+    'administer mymodule' => array(
+      'title' => t('Administer Sergiu-s module'),
+      'description' => t('Perform administration tasks for my module.'),
+    ),
+  );
+}

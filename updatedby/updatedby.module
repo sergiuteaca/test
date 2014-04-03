@@ -1,0 +1,43 @@
+<?php
+/**
+ * Get the last updated date for nodes.
+ *
+ * @return
+ *   A formatted date for the last updated time if there are published nodes,
+ *   FALSE otherwise.
+ */
+
+/*
+function _mymodule_last_updated() {
+  // Pull from cache if available
+  if($cache = cache_get('mymodule_last_updated')) {
+    $last_updated = $cache->data;
+  }
+  else {
+    // Otherwise, find the timestamp for the latest node record
+    $last_updated = db_select('node', 'n')
+      ->fields('n', array('changed'))
+      ->condition('status', 0, '>') // only published nodes count
+      ->orderBy('changed', 'DESC')
+      ->range(0, 1)
+      ->execute()
+      ->fetchField();
+
+    // If nothing found, return FALSE.
+    if (!$last_updated) {
+      return FALSE;
+    }
+
+    // Otherwise, save the data to cache for one hour.
+    cache_set('mymodule_last_updated', $last_updated, 'cache', time() + 10000);
+  }
+
+  return format_date($last_updated);
+}
+*/
+
+function node_last_updated(){
+	$node->content[]= array(
+	'#markup'=> t('The site was last updated on @date by @user.', array('@date' => $last_update, '@user' => $user->name)),
+);
+}

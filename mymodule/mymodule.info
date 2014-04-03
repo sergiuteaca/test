@@ -1,0 +1,4 @@
+core = "7.x"
+description = "Sergiu's module"
+package = "Sergiu PKG"
+name = "My Module"

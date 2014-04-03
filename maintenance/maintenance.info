@@ -1,0 +1,4 @@
+name = "Maintenance Mode Button"
+description = "Sergiu's 4th module"
+core = "7.x"
+package = "Sergiu PKG"

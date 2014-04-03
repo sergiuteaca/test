@@ -1,0 +1,89 @@
+<?php
+/**
+ * Implements hook_form
+ */
+function contentmgr_menu()
+{
+  $items['contentmgr'] = array(
+    'title' => 'Content Manager',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('contentmgr_form'),
+    'access arguments' => array('content access'),
+  );
+  return $items;
+}
+
+/********************************************************************/
+/********************************************************************/
+function contentmgr_form()
+{
+  $nodtitle = array();
+
+  $nodes = node_load_multiple(array(), array('type' => 'article'));
+
+  foreach ($nodes as $node) {
+    $nodtitle[$node->nid] = $node->title;
+  }
+
+  $form['nid'] = array(
+    '#type' => 'select',
+    '#title' => t('Lista Titlurilor'),
+    '#options' => $nodtitle,
+    '#default_value' => 0,
+  );
+
+  $form['status'] = array(
+    '#type' => 'select',
+    '#title' => t('Publicat sau nu'),
+    '#options' => array(
+      0 => 'Unpublished',
+      1 => 'Published'
+    ),
+  );
+
+  $form['sticky'] = array(
+    '#type' => 'select',
+    '#title' => t('Promovat pentru prima pagina?'),
+    '#options' => array(
+      0 => 'No',
+      1 => 'Yes'
+    ),
+  );
+
+  $form['submitupdate'] = array(
+    '#type' => 'submit',
+    '#value' => 'Update',
+  );
+
+  $form['submitdelete'] = array(
+    '#type' => 'submit',
+    '#value' => 'Delete',
+  );
+
+  return $form;
+}
+
+function contentmgr_form_submit($form, &$form_state) {
+  dpm($form_state);
+//    if ($form_state['clicked_button']['#value'] == $form_state['values']['submitupdate']){
+//        variable_set('submitupdate', $form_state['values']['status']);
+//        drupal_set_message(t('Maladet, ai schimbat starea publicarii '));
+//    }
+//
+//    else if($form_state['clicked_button']['#value'] == $form_state['values']['submitdelete']){
+//        node_delete($form_state['values']['nodetitle']);
+//        drupal_set_message(t('Maladet, ai sters nodul '));
+//    }
+
+  if ($form_state['values']['op'] === 'Update') {
+    $node = node_load($form_state['values']['nid']);
+    $node->status = $form_state['values']['status'];
+    $node->sticky = $form_state['values']['sticky'];
+    dpm($node);
+    node_save($node);
+    drupal_set_message(t('Maladet, ai schimbat starea publicarii '));
+  } else if ($form_state['values']['op'] == 'Delete') {
+    node_delete($form_state['values']['nid']);
+    drupal_set_message(t('Maladet, ai sters nodul '));
+  }
+}
