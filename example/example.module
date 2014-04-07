@@ -1,0 +1,18 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: Sergiu
+ * Date: 4/7/14
+ * Time: 12:19 PM
+ */
+function example_menu(){
+$items['example/add'] = array(
+  'title' => 'Add Example',
+  'page callback' => 'drupal_get_form',
+  'page arguments' => array('_example_add'),
+  'access arguments' => array('create example content'),
+  'type' => MENU_CALLBACK,
+  'file' => 'example.add.inc',
+);
+}
+

@@ -7,14 +7,32 @@ function contentmgr_menu()
   $items['contentmgr'] = array(
     'title' => 'Content Manager',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('contentmgr_form'),
+    'page arguments' => array('_contentmgr_f'),
     'access arguments' => array('content access'),
   );
   return $items;
 }
+/********************************************************************/
+/********************************************************************/
+function _contentmgr_f($form_state)
+{
+  if ($form_state['input']['op'] == 'Delete') {
+    dpm($form_state,'ceva');
+    $node = node_load($form_state['input']['nid']);
+   // return array_merge($form, contentmgr_delete_confirm($form, $form_state, $node));
+    return contentmgr_delete_confirm($form, $form_state, $node);
+  }
+  return contentmgr_form($form, $form_state);
+}
+function _example_add($form_state) {
+  // If a file has already been uploaded, we know we need the confirmation form
+  if (isset($form_state['values']['file'])) {
+    return _example_add_form_confirm($form_state);
+  }
+  // But the default is the main form
+  return _example_add_form($form_state);
+}
 
-/********************************************************************/
-/********************************************************************/
 function contentmgr_form($form, &$form_state)
 {
 
@@ -66,49 +84,39 @@ function contentmgr_form($form, &$form_state)
     '#type' => 'submit',
     '#value' => 'Delete',
   );
-
-
-
   return $form;
 }
 
 function contentmgr_form_submit($form, &$form_state) {
-  if (isset($form['nid'])) {
-    $node = node_load($form['nid']['#value']);
-    node_delete($form_state['values']['nid']);
-    cache_clear_all();
-    watchdog('content', '@type: deleted %title.', array('@type' => $node->type, '%title' => $node->title));
-    drupal_set_message(t('@type %title has been deleted.', array('@type' => node_type_get_name($node), '%title' => $node->title)));
-    $form_state['redirect'] = 'contentmgr';
-  }
-
-  $node = node_load($form_state['values']['nid']);
-  if ($form_state['triggering_element']['#value'] == t('Delete')) {
-    // Execute the term deletion.
-    //return contentmgr_delete_confirm($form, $form_state, $node);
-    // Rebuild the form to confirm term deletion.
-    $form_state['rebuild'] = TRUE;
-    $form_state['confirm_delete'] = TRUE;
-    return;
-  }
-
-
-
+  $node = node_load($form['nid']['#value']);
+//node_delete($form_state['values']['nid']);
   if ($form_state['values']['op'] === 'Update') {
     $node->status = $form_state['values']['status'];
     $node->sticky = $form_state['values']['sticky'];
     node_save($node);
     drupal_set_message(t('Maladet, ai schimbat starea publicarii '));
+    return $form;
+  }
+  if ($form_state['triggering_element']['#value'] == t('Delete')) {
+      // Execute the term deletion.
+      //return contentmgr_delete_confirm($form, $form_state, $node);
+      // Rebuild the form to confirm term deletion.
+      $form_state['rebuild'] = TRUE;
+      $form_state['confirm_delete'] = TRUE;
+  }
+  dpm($form,'isset');
+  if (isset($form['nid'])) {
+    cache_clear_all();
+    watchdog('content', '@type: deleted %title.', array('@type' => $node->type, '%title' => $node->title));
+    drupal_set_message(t('@type %title has been deleted.', array('@type' => node_type_get_name($node), '%title' => $node->title)));
+    $form_state['redirect'] = 'contentmgr';
   }
     //$regcode = $form_state;
-   // drupal_goto('contentmgr/confirm/'); // this is menu callback for og_user_roles_register_confirm()
-
-
   return $form;
 }
 
 function contentmgr_delete_confirm($form, &$form_state, $node) {
-  dpm('hi');
+  //dpm('hi');
   $form['#node'] = $node;
   // Always provide entity id in the same form key as in the entity edit form.
   $form['nid'] = array('#type' => 'value', '#value' => $node->nid);
@@ -124,7 +132,5 @@ function contentmgr_delete_confirm($form, &$form_state, $node) {
 
 function contentmgr_delete_confirm_submit($form, &$form_state) {
   dpm($form_state,'conf subm');
-
-
-  //$form_state['redirect'] = 'contentmgr';
+  $form_state['redirect'] = 'contentmgr';
  }
