@@ -1,0 +1,4 @@
+name = "Node Mini Statistics"
+description = "Sergiu's 7th module"
+core = "7.x"
+package = "Sergiu PKG"

@@ -1,0 +1,83 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: Lena
+ * Date: 4/4/14
+ * Time: 7:15 PM
+ */
+
+//function sample2_schema(){
+//  $schema['mytable1'] = array(
+//    'description' => t('My table description'),
+//    'fields' => array(
+//      'mycolumn1' => array(
+//        'description' => t('My unique identifier'),
+//        'type' => 'serial',
+//        'unsigned' => true,
+//        'not null' => true,
+//      ),
+//      'myvarchar' => array(
+//        'description' => t('My varchar'),
+//        'type' => 'varchar',
+//        'length' => 32,
+//        'not null' => true,
+//      ),
+//      'mytimestamp' => array(
+//        'description' => t('My timestamp'),
+//        'type' => 'int',
+//        'not null' => true,
+//      ),
+//    ),
+//    'indexes' => array(
+//      'myvarchar' => array('myvarchar'),
+//    ),
+//    'primary key' => array('mycolumn1'),
+//    'unique keys' => array(
+//      'mycolumn1' => array('mycolumn1'),
+//    ),
+//  );
+//
+//  return $schema;
+//}
+//function sample2_install(){
+//  drupal_install_schema('sample2');
+//}
+//function sample2_uninstall(){
+//  drupal_uninstall_schema('sample2');
+//}
+/*
+function bbstat_schema() {
+  $schema['bbstat'] = array(
+    'description' => 'Mini Statistica test.',
+    'fields' => array(
+      'nid' => array('description' => 'The Node Identifier', 'type' => 'int'),
+      'uid' => array('description' => 'The User Identifier', 'type' => 'int'),
+      'timestamp' => array('description' => 'The time variable', 'type' => 'int'),
+    ),
+  );
+  //drupal_install_schema('bbstat');
+  return $schema;
+}*/
+function test_schema() {
+$schema['aaaastat'] = array(
+  'description' => 'TODO',
+  'fields' => array(
+    'nid' => array(
+      'description' => 'sdfzvxc',
+      'type' => 'int',
+      'not null' => TRUE,
+    ),
+    'uid' => array(
+      'description' => 'Tdsfgvsxc!',
+      'type' => 'int',
+      'not null' => TRUE,
+    ),
+    'timestamp' => array(
+      'description' => 'dsfgbdvxd',
+      'type' => 'int',
+      'not null' => TRUE,
+    ),
+  ),
+);
+  return $schema;
+}

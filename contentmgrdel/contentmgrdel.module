@@ -1,0 +1,51 @@
+<?php
+
+/**
+ * Implements hook_menu().
+ */
+function contentmgrdel_menu() {
+//  $items = array();
+  $items['contentmgrdel'] = array(
+    'title' => 'Something',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('contentmgrdel_form'),
+    'access arguments' => array('access content'),
+  );
+  return $items;
+}
+
+/**
+ * Confirm form example
+ */
+function contentmgrdel_form() {
+
+  //you can pass variables here if need be
+  $form['_my_var'] = array(
+    '#type' => 'value',
+    '#value' => 'MY Variable',
+  );
+  //you can set a redirect if needed
+  $form['#redirect'] = 'user';
+
+  return confirm_form($form,
+    t('Are you sure you want to do something?'), //message title
+    isset($_GET['destination']) ? $_GET['destination'] : 'user', //redirect if cancelled
+    t('Only say yes if you are really sure.'), //message description
+    t('Lets Do it!'), //confirm button text
+    t('Cancel') //cancel button text
+  );
+}
+
+/**
+ * Submit handler for confirm form
+ */
+function contentmgrdel_form_submit($form, &$form_state) {
+  //verify that the form was confirmed
+  if ($form_state['values']['confirm']) {
+    //Do something here
+
+    //set a message
+    drupal_set_message('You did something!');
+
+  }
+}

@@ -15,8 +15,15 @@ function contentmgr_menu()
 
 /********************************************************************/
 /********************************************************************/
-function contentmgr_form()
+function contentmgr_form($form, &$form_state)
 {
+
+  if ($form_state['input']['op'] == 'Delete') {
+    dpm($form_state,'ceva');
+    $node = node_load($form_state['input']['nid']);
+    return array_merge($form, contentmgr_delete_confirm($form, $form_state, $node));
+  }
+
   $nodtitle = array();
 
   $nodes = node_load_multiple(array(), array('type' => 'article'));
@@ -60,30 +67,64 @@ function contentmgr_form()
     '#value' => 'Delete',
   );
 
+
+
   return $form;
 }
 
 function contentmgr_form_submit($form, &$form_state) {
-  dpm($form_state);
-//    if ($form_state['clicked_button']['#value'] == $form_state['values']['submitupdate']){
-//        variable_set('submitupdate', $form_state['values']['status']);
-//        drupal_set_message(t('Maladet, ai schimbat starea publicarii '));
-//    }
-//
-//    else if($form_state['clicked_button']['#value'] == $form_state['values']['submitdelete']){
-//        node_delete($form_state['values']['nodetitle']);
-//        drupal_set_message(t('Maladet, ai sters nodul '));
-//    }
+  if (isset($form['nid'])) {
+    $node = node_load($form['nid']['#value']);
+    node_delete($form_state['values']['nid']);
+    cache_clear_all();
+    watchdog('content', '@type: deleted %title.', array('@type' => $node->type, '%title' => $node->title));
+    drupal_set_message(t('@type %title has been deleted.', array('@type' => node_type_get_name($node), '%title' => $node->title)));
+    $form_state['redirect'] = 'contentmgr';
+  }
+
+  $node = node_load($form_state['values']['nid']);
+  if ($form_state['triggering_element']['#value'] == t('Delete')) {
+    // Execute the term deletion.
+    //return contentmgr_delete_confirm($form, $form_state, $node);
+    // Rebuild the form to confirm term deletion.
+    $form_state['rebuild'] = TRUE;
+    $form_state['confirm_delete'] = TRUE;
+    return;
+  }
+
+
 
   if ($form_state['values']['op'] === 'Update') {
-    $node = node_load($form_state['values']['nid']);
     $node->status = $form_state['values']['status'];
     $node->sticky = $form_state['values']['sticky'];
-    dpm($node);
     node_save($node);
     drupal_set_message(t('Maladet, ai schimbat starea publicarii '));
-  } else if ($form_state['values']['op'] == 'Delete') {
-    node_delete($form_state['values']['nid']);
-    drupal_set_message(t('Maladet, ai sters nodul '));
   }
+    //$regcode = $form_state;
+   // drupal_goto('contentmgr/confirm/'); // this is menu callback for og_user_roles_register_confirm()
+
+
+  return $form;
 }
+
+function contentmgr_delete_confirm($form, &$form_state, $node) {
+  dpm('hi');
+  $form['#node'] = $node;
+  // Always provide entity id in the same form key as in the entity edit form.
+  $form['nid'] = array('#type' => 'value', '#value' => $node->nid);
+  //$form['#submit'][] = 'contentmgr_delete_confirm_submit';
+  return confirm_form($form,
+    t('Are you sure you want to delete %title?', array('%title' => $node->title)),
+    'contentmgr',
+    t('This action cannot be undone.'),
+    t('Delete'),
+    t('Cancel')
+  );
+}
+
+function contentmgr_delete_confirm_submit($form, &$form_state) {
+  dpm($form_state,'conf subm');
+
+
+  //$form_state['redirect'] = 'contentmgr';
+ }
