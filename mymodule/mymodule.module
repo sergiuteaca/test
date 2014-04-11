@@ -1,69 +1,117 @@
 <?php
-//**************************************************
-//Page info
+/**
+ * Created by PhpStorm.
+ * User: Sergiu
+ * Date: 4/10/14
+ * Time: 5:18 PM
+ */
+
+/**
+ * Implements hook_menu().
+ */
 function mymodule_menu() {
-    $items['mypage'] = array(   //mypage e adresa scrisa in url
-        'title' => 'My Page',
-        'page callback' => 'mypage_page',   //numele functiei care o chemam
-      //  'page arguments' => array(1),       //pentru a lua argumentul de pe locul 2 din ulr path  ( node / % )
-        //'access callback'=> 'user_access'   //accesul utilizatorilor
-        'access arguments' => array('access mymodule'),   //setarea permisiunilor din People -> Permissions
+  $items = array();
 
-     );
-    return $items;
-}
-
-//****************************************************
-//Page function
-function mypage_page() {
-if (user_is_logged_in() == TRUE) {
-    global $user;
-
-    return 'Welcome ' . $user->name;
-}
-else {
-    return 'Please log in.';
-}
-}
-
-
-//*****************************
-//Block Info
-
-function mymodule_block_info() {
-  $blocks['mymodule_block'] = array(
-    'info' => t('Hello block'),
-    'cache' => DRUPAL_CACHE_PER_ROLE,
+  $items['mymodule/page'] = array(
+    'page callback' => 'mymodule_page',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
   );
-  return $blocks;
-}
 
-//****************************
-//Block function
-function mymodule_block_view($delta = '') {
-  // Add your content here and write it to $content
-    global $user;
-  
-  $block['subject'] = t('Wellcome');
-  if (user_is_logged_in() == TRUE) {
-     $content = t('Hello '. $user->name);
-     $block['content'] = $content;
-     }
-else {
-     $block['content'] = t('Login, you piece of shit');
-}
-
-  return $block;
-}
-
-/*
-*Implimentig hook_permision
-*/
-function mymodule_permission() {
-  return array(
-    'administer mymodule' => array(
-      'title' => t('Administer Sergiu-s module'),
-      'description' => t('Perform administration tasks for my module.'),
-    ),
+  $items['mymodule/%ctools_js'] = array(
+    'page callback' => 'mymodule_callback',
+    'page arguments' => array(1),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
   );
+
+  return $items;
 }
+
+/**
+ * Helper function to make a link.
+ */
+function _mymodule_make_link($link_text = '') {
+  // Set a default value if no text in supplied.
+  if (empty($link_text)) {
+    $link_text = 'Magical Modal';
+  }
+
+  return '<div id="magical-modal-link">' . l($link_text, 'mymodule/nojs', array('attributes' => array('class' => 'ctools-use-modal'))) . '</div>';
+}
+
+/**
+ * An example page.
+ */
+function mymodule_page() {
+  // Load the modal library and add the modal javascript.
+  ctools_include('modal');
+  ctools_modal_add_js();
+  return _mymodule_make_link('Magical modal');
+}
+
+/**
+ * Ajax menu callback.
+ */
+function mymodule_callback($ajax) {
+  if ($ajax) {
+    ctools_include('ajax');
+    ctools_include('modal');
+
+    $form_state = array(
+      'ajax' => TRUE,
+      'title' => t('MyModule Modal Form'),
+    );
+
+    // Use ctools to generate ajax instructions for the browser to create
+    // a form in a modal popup.
+    $output = ctools_modal_form_wrapper('mymodule_form', $form_state);
+
+    // If the form has been submitted, there may be additional instructions
+    // such as dismissing the modal popup.
+    if (!empty($form_state['ajax_commands'])) {
+      $output = $form_state['ajax_commands'];
+    }
+
+    // Return the ajax instructions to the browser via ajax_render().
+    print ajax_render($output);
+    drupal_exit();
+  }
+  else {
+    return drupal_get_form('mymodule_form');
+  }
+}
+
+/**
+ * Drupal form to be put in a modal.
+ */
+function mymodule_form($form, $form_state) {
+  $form = array();
+
+  $form['new_link_text'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Link text'),
+  );
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Submit'),
+  );
+
+  return $form;
+}
+
+/**
+ * Drupal form submit handler.
+ */
+function mymodule_form_submit(&$form, &$form_state) {
+  // Generate the new link using the submitted text value.
+  $link = _mymodule_make_link($form_state['values']['new_link_text']);
+
+  // Tell the browser to close the modal.
+  $form_state['ajax_commands'][] = ctools_modal_command_dismiss();
+
+  // Tell the browser to replace the old link with the new one.
+  $form_state['ajax_commands'][] = ajax_command_replace('#magical-modal-link', $link);
+}
+

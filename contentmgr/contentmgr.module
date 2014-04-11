@@ -7,44 +7,44 @@ function contentmgr_menu()
   $items['contentmgr'] = array(
     'title' => 'Content Manager',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('_contentmgr_f'),
+    'page arguments' => array('contentmgr_form'),
     'access arguments' => array('content access'),
   );
   return $items;
 }
 /********************************************************************/
 /********************************************************************/
-function _contentmgr_f($form_state)
-{
-  if ($form_state['input']['op'] == 'Delete') {
-    dpm($form_state,'ceva');
-    $node = node_load($form_state['input']['nid']);
-   // return array_merge($form, contentmgr_delete_confirm($form, $form_state, $node));
-    return contentmgr_delete_confirm($form, $form_state, $node);
-  }
-  return contentmgr_form($form, $form_state);
-}
-function _example_add($form_state) {
-  // If a file has already been uploaded, we know we need the confirmation form
-  if (isset($form_state['values']['file'])) {
-    return _example_add_form_confirm($form_state);
-  }
-  // But the default is the main form
-  return _example_add_form($form_state);
-}
-
+//function _contentmgr_f($form_state)
+//{
+//  if ($form_state['input']['op'] == 'Delete') {
+//    dpm($form_state,'ceva');
+//    $node = node_load($form_state['input']['nid']);
+//   // return array_merge($form, contentmgr_delete_confirm($form, $form_state, $node));
+//    return contentmgr_delete_confirm($form, $form_state, $node);
+//  }
+//  return contentmgr_form($form, $form_state);
+//}
+//function _example_add($form_state) {
+//  // If a file has already been uploaded, we know we need the confirmation form
+//  if (isset($form_state['values']['file'])) {
+//    return _example_add_form_confirm($form_state);
+//  }
+//  // But the default is the main form
+//  return _example_add_form($form_state);
+//}
+//
 function contentmgr_form($form, &$form_state)
 {
 
-  if ($form_state['input']['op'] == 'Delete') {
-    dpm($form_state,'ceva');
-    $node = node_load($form_state['input']['nid']);
-    return array_merge($form, contentmgr_delete_confirm($form, $form_state, $node));
-  }
+//  if ($form_state['input']['op'] == 'Delete') {
+//    dpm($form_state,'ceva');
+//    $node = node_load($form_state['input']['nid']);
+//    return array_merge($form, contentmgr_delete_confirm($form, $form_state, $node));
+//  }
 
   $nodtitle = array();
 
-  $nodes = node_load_multiple(array(), array('type' => 'article'));
+  $nodes = node_load_multiple (array(), array('type' => 'article'));
 
   foreach ($nodes as $node) {
     $nodtitle[$node->nid] = $node->title;
@@ -84,53 +84,57 @@ function contentmgr_form($form, &$form_state)
     '#type' => 'submit',
     '#value' => 'Delete',
   );
+  dpm($form,'forma');
   return $form;
 }
 
 function contentmgr_form_submit($form, &$form_state) {
+  dpm($form_state);
   $node = node_load($form['nid']['#value']);
 //node_delete($form_state['values']['nid']);
-  if ($form_state['values']['op'] === 'Update') {
+  if ($form_state['values']['op'] == 'Update') {
     $node->status = $form_state['values']['status'];
     $node->sticky = $form_state['values']['sticky'];
     node_save($node);
     drupal_set_message(t('Maladet, ai schimbat starea publicarii '));
     return $form;
   }
-  if ($form_state['triggering_element']['#value'] == t('Delete')) {
+  if ($form_state['values']['op'] == 'Delete') {
       // Execute the term deletion.
       //return contentmgr_delete_confirm($form, $form_state, $node);
       // Rebuild the form to confirm term deletion.
-      $form_state['rebuild'] = TRUE;
-      $form_state['confirm_delete'] = TRUE;
+//      $form_state['rebuild'] = TRUE;
+//      $form_state['confirm_delete'] = TRUE;
+    drupal_set_message(t('Vseo, nu mai este nodul cu titulul @titlul', array('@titlul'=> $node->title)));
+    node_delete($node->nid);
   }
-  dpm($form,'isset');
-  if (isset($form['nid'])) {
-    cache_clear_all();
-    watchdog('content', '@type: deleted %title.', array('@type' => $node->type, '%title' => $node->title));
-    drupal_set_message(t('@type %title has been deleted.', array('@type' => node_type_get_name($node), '%title' => $node->title)));
-    $form_state['redirect'] = 'contentmgr';
-  }
-    //$regcode = $form_state;
+//  dpm($form,'isset');
+//  if (isset($form['nid'])) {
+//    cache_clear_all();
+//    watchdog('content', '@type: deleted %title.', array('@type' => $node->type, '%title' => $node->title));
+//    drupal_set_message(t('@type %title has been deleted.', array('@type' => node_type_get_name($node), '%title' => $node->title)));
+//    $form_state['redirect'] = 'contentmgr';
+//  }
+//    //$regcode = $form_state;
   return $form;
 }
-
-function contentmgr_delete_confirm($form, &$form_state, $node) {
-  //dpm('hi');
-  $form['#node'] = $node;
-  // Always provide entity id in the same form key as in the entity edit form.
-  $form['nid'] = array('#type' => 'value', '#value' => $node->nid);
-  //$form['#submit'][] = 'contentmgr_delete_confirm_submit';
-  return confirm_form($form,
-    t('Are you sure you want to delete %title?', array('%title' => $node->title)),
-    'contentmgr',
-    t('This action cannot be undone.'),
-    t('Delete'),
-    t('Cancel')
-  );
-}
-
-function contentmgr_delete_confirm_submit($form, &$form_state) {
-  dpm($form_state,'conf subm');
-  $form_state['redirect'] = 'contentmgr';
- }
+//
+//function contentmgr_delete_confirm($form, &$form_state, $node) {
+//  //dpm('hi');
+//  $form['#node'] = $node;
+//  // Always provide entity id in the same form key as in the entity edit form.
+//  $form['nid'] = array('#type' => 'value', '#value' => $node->nid);
+//  //$form['#submit'][] = 'contentmgr_delete_confirm_submit';
+//  return confirm_form($form,
+//    t('Are you sure you want to delete %title?', array('%title' => $node->title)),
+//    'contentmgr',
+//    t('This action cannot be undone.'),
+//    t('Delete'),
+//    t('Cancel')
+//  );
+//}
+//
+//function contentmgr_delete_confirm_submit($form, &$form_state) {
+//  dpm($form_state,'conf subm');
+//  $form_state['redirect'] = 'contentmgr';
+// }

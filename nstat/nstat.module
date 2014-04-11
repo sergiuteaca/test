@@ -10,21 +10,9 @@ function nstat_schema() {
 $schema['nstat'] = array(
   'description' => 'Mini Statistics',
   'fields' => array(
-    'nid' => array(
-      'description' => 'The node ID',
-      'type' => 'int',
-      'not null' => TRUE,
-    ),
-    'uid' => array(
-      'description' => 'The User ID',
-      'type' => 'int',
-      'not null' => TRUE,
-    ),
-    'timestamp' => array(
-      'description' => 'The field designated for time storage',
-      'type' => 'int',
-      'not null' => TRUE,
-    ),
+    'nid' => array('description' => 'The node ID', 'type' => 'int','not null' => TRUE,),
+    'uid' => array('description' => 'The User ID', 'type' => 'int','not null' => TRUE,),
+    'timestamp' => array('description' => 'The field designated for time storage','type' => 'int','not null' => TRUE,),
   ),
 );
   return $schema;
@@ -46,12 +34,23 @@ $nid = db_insert('nstat')
 
   $result = db_query("SELECT * FROM {nstat} WHERE nid = :nid", array(':nid' => $node->nid));
   $record = $result->fetchALL();
-
   $number_of_rows = $result->rowCount();
-  // $number_of_rows = db_select('nstat')->countQuery()->execute()->fetchField();
-  //dpm($number_of_rows,'asasd');
 
+  $resultnew = db_query("SELECT COUNT (*) FROM {nstat} WHERE nid = :nid", array(':nid' => $node->nid));
+  $recordnew = $resultnew->fetchField();
 
+   $azi = mktime(0, 0, 0, date("m")  , date("d"), date("Y"));
+   //dpm($azi,'today');
+
+   $resultnew2 = db_query("SELECT COUNT (*) FROM {nstat} WHERE nid = :nid and timestamp > :azi", array(':nid' => $node->nid, ':azi' => $azi));
+   $recordnew2 = $resultnew2->fetchField();
+   //dpm($recordnew2,'recordnew 2');
+
+   $resultnew3 = db_query("SELECT * FROM {nstat} WHERE nid = :nid ORDER BY timestamp DESC LIMIT 2", array(':nid' => $node->nid));
+   $recordnew3 = $resultnew3 -> fetchALL();
+  //   dpm ($recordnew3,'ultimile 2 valori');
+
+// $number_of_rows = db_select('nstat')->countQuery()->execute()->fetchField();
 //  foreach($result as $data) {
 //    $rows[] = array(
 //      $data->uid,
@@ -66,40 +65,50 @@ $nid = db_insert('nstat')
   //dpm($rows,'row');
   //dpm($result->fetchAll(), 'results');
 //$total = 0;
-$today = 0;
-$today2 = 0;
-   foreach ($record as $i => $value){
-     $timpul[$i] = gmdate("d-m-Y", $record[$i]->timestamp);
-     if ($timpul[$i]== gmdate("d-m-Y",REQUEST_TIME)) $today2++;
-   }
-
-  //for($i=0; $i <= $number_of_rows-1; $i++) {
-  foreach ($record as $i => $value) {
-    //if($record[$i]->nid == $node->nid)$total = $total + 1;
-    if($record[$i]->timestamp >= REQUEST_TIME-86400)$today++;
+//$today = 0;
+//$today2 = 0;
+//   foreach ($record as $i => $value){
+//     $timpul[$i] = gmdate("d-m-Y", $record[$i]->timestamp);
+//     if ($timpul[$i]== gmdate("d-m-Y",REQUEST_TIME)) $today2++;
+//   }
+//
+//  //for($i=0; $i <= $number_of_rows-1; $i++) {
+//  foreach ($record as $i => $value) {
+//    //if($record[$i]->nid == $node->nid)$total = $total + 1;
+//    if($record[$i]->timestamp >= REQUEST_TIME-86400)$today++;
+//  }
+////dpm($today);
+//  $date = format_date($record[$number_of_rows-2]->timestamp, 'custom', 'd-m-Y H:i');
+//  //$date_all = format_date($record->timestamp, 'custom', 'd.m.Y');
+//  //dpm($date_all,'date');
+//
+//
+// // dpm($record,'record time');
+//  dpm($timpul,'timpul');
+//   dpm($today2,'azi2');
+//  $uuid = $record[$number_of_rows-2]->uid;
+//  //dpm($uuid,'uuid');
+$userview = '';
+$uuid = '';
+   $viewtime = format_date($recordnew3[0]->timestamp, 'custom', 'd-m-y H:i');
+  if (!isset ($recordnew3[1])) {
+    $userview = 'First View';
+    $uuid = $recordnew3[0]->uid;
   }
-//dpm($today);
-  $date = format_date($record[$number_of_rows-2]->timestamp, 'custom', 'd-m-Y H:i');
-  //$date_all = format_date($record->timestamp, 'custom', 'd.m.Y');
-  //dpm($date_all,'date');
+  else {
+    //$uuid = $recordnew3[1]->uid;
+    //if ($uuid == 0) $userview = 'Anonymus';
+    //else $userview = $record2->name;
 
-
- // dpm($record,'record time');
-  dpm($timpul,'timpul');
-   dpm($today2,'azi2');
-  $uuid = $record[$number_of_rows-2]->uid;
-  //dpm($uuid,'uuid');
   $result2 = db_query("SELECT name FROM {users} WHERE uid = :uid", array(':uid' => $uuid));
+  $record2 = $result2->fetch();
 
-  $record2 = $result2->fetchall();
-  if ($number_of_rows == 1) $userview = 'First View';
-  else if ($uuid == 0) $userview = 'Anonymus';
-  else $userview = $record2[0]->name;
-
-//dpm($record2);
+   if (!isset($record2)) $userview = 'Anonymus';
+   //dpm($record2->name,'numele');
+  }
   $node->content['my_extra_content'] =array(
-    '#weight' => -11111,
-    '#markup' => t('</br>Last viewed by: <font color ="red">'. $userview .'</font> at '. $date .'</br>Number of viwes: '. $today2 .' today /'.  $number_of_rows . ' total</br>'),
+    '#weight' => -10000,
+    '#markup' => t('</br>Last viewed by: <font color ="red">'. $userview .'</font> at '. $viewtime .'</br>Number of viwes: '. $recordnew2 .' today /'.  $recordnew . ' total</br>'),
   );
 
 //  $node->content['my_extra_content'] =array(

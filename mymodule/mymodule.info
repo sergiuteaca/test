@@ -1,4 +1,4 @@
-core = "7.x"
-description = "Sergiu's module"
-package = "Sergiu PKG"
-name = "My Module"
+core = 7.x
+name = My module popup
+description = pop up
+package = Sergiu PKG
