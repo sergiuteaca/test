@@ -6,7 +6,7 @@
 
 
 function maintenance_mode2_alter(&$form, &$form_state, $formid){
-    dpm($formid);
+    dpm($form);
 
         if ($formid == 'system_site_information_settings'){
             $form['mainten'] = array(

@@ -1,0 +1,4 @@
+core = 7.x
+name = PopUp user login
+description = Custom pop up login.
+package = Sergiu PKG

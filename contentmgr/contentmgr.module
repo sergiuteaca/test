@@ -84,20 +84,21 @@ function contentmgr_form($form, &$form_state)
     '#type' => 'submit',
     '#value' => 'Delete',
   );
-  dpm($form,'forma');
+//  dpm($form,'form');
+//  dpm($form_state,'formstate');
   return $form;
 }
 
 function contentmgr_form_submit($form, &$form_state) {
-  dpm($form_state);
   $node = node_load($form['nid']['#value']);
+  //$form_state['ajax_commands'][] = ctools_modal_command_dismiss();
 //node_delete($form_state['values']['nid']);
   if ($form_state['values']['op'] == 'Update') {
     $node->status = $form_state['values']['status'];
     $node->sticky = $form_state['values']['sticky'];
     node_save($node);
     drupal_set_message(t('Maladet, ai schimbat starea publicarii '));
-    return $form;
+//    return $form;
   }
   if ($form_state['values']['op'] == 'Delete') {
       // Execute the term deletion.
@@ -116,6 +117,10 @@ function contentmgr_form_submit($form, &$form_state) {
 //    $form_state['redirect'] = 'contentmgr';
 //  }
 //    //$regcode = $form_state;
+  //$form_state['ajax_commands'][] = ctools_modal_command_dismiss();
+//  dpm($form_id,'id');
+//  dpm($form,'form');
+//  dpm($form_state,'formstate');
   return $form;
 }
 //

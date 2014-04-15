@@ -1,0 +1,91 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: Sergiu
+ * Date: 4/7/14
+ * Time: 4:34 PM
+ */
+
+function likeajax_node_view($node, $view_mode, $langcode)
+{
+  if ($view_mode == 'full') {
+    $node->content['extra_content_button'] = drupal_get_form('likeajax_form', $node->nid);
+  }
+  return;
+}
+
+function likeajax_form($form, &$form_state, $nnid)
+{
+  global $user;
+
+  $result = db_query("SELECT COUNT (*) FROM {likes} WHERE nid = :nid AND uid = :uid", array(':nid' => $nnid, ':uid' => $user->uid));
+  $record = $result->fetchField();
+  dpm($record, 'result');
+
+  $result2 = db_query("SELECT COUNT (*) FROM {likes} WHERE nid = :nid", array(':nid' => $nnid));
+  $record2 = $result2->fetchField();
+  dpm($record2, 'total');
+
+  $form['#prefix'] = '<div id="like-wrapper">';
+  $form['#suffix'] = '</div>';
+  $form['#tree'] = TRUE;
+
+  $form_state['storage']['likesperuser'] = $record;
+  $form_state['storage']['nid'] = $nnid;
+  $form_state['storage']['uid'] = $user->uid;
+
+  if ($form_state['storage']['likesperuser'] == 0) {
+    $form['like_submit'] = array(
+      '#type' => 'submit',
+      '#value' => t('LIKE'),
+      '#ajax' => array(
+        'callback' => 'likeajax_callback',
+        'wrapper' => 'like-wrapper',
+      ),
+    );
+  } else {
+    $form['unlike_submit'] = array(
+      '#type' => 'submit',
+      '#value' => t('UNLIKE'),
+      '#ajax' => array(
+        'callback' => 'likeajax_callback',
+        'wrapper' => 'like-wrapper',
+      ),
+    );
+  }
+  $form['text'] = array(
+    '#markup' => t('<br>@likes Likes', array('@likes' => $record2)),
+    '#ajax' => array(
+      'callback' => 'likeajax_callback',
+      'wrapper' => 'like-wrapper',
+    ),
+  );
+
+  return $form;
+}
+function likeajax_callback($form, $form_state)
+{
+  return $form;
+}
+
+
+function likeajax_form_submit($form, &$form_state)
+{
+  dpm($form_state['storage']);
+  if ($form_state['values']['op'] == 'LIKE') {
+
+    $query = db_insert('likes')
+      ->fields(array(
+        'nid' => $form_state['storage']['nid'],
+        'uid' => $form_state['storage']['uid'],
+      ))
+      ->execute();
+    $form_state['storage']['likesperuser'] = 1;
+  } else {
+    dpm($form_state['storage']['nid'], 'dfgsxzvcv');
+    $query = db_query("DELETE FROM {likes} WHERE nid = :nid AND uid = :uid", array(':nid' => $form_state['storage']['nid'], ':uid' => $form_state['storage']['uid']));
+    $form_state['storage']['likesperuser'] = 0;
+  }
+  $form_state['rebuild'] = TRUE;
+
+}

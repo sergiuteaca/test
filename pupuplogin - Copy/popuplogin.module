@@ -65,7 +65,7 @@ function mymodule_callback($ajax) {
 
     // Use ctools to generate ajax instructions for the browser to create
     // a form in a modal popup.
-    $output = ctools_modal_form_wrapper('contentmgr_form', $form_state);
+    $output = ctools_modal_form_wrapper('mymodule_form', $form_state);
 
     // If the form has been submitted, there may be additional instructions
     // such as dismissing the modal popup.
@@ -78,7 +78,7 @@ function mymodule_callback($ajax) {
     drupal_exit();
   }
   else {
-    return drupal_get_form('contentmge_form');
+    return drupal_get_form('mymodule_form');
   }
 }
 
@@ -113,16 +113,5 @@ function mymodule_form_submit(&$form, &$form_state) {
 
   // Tell the browser to replace the old link with the new one.
   $form_state['ajax_commands'][] = ajax_command_replace('#magical-modal-link', $link);
-}
-
-
-
-function contentmgr_form_alter(&$form, &$form_state, $form_id){
-  if ($form_id == 'contentmgr_form'){
-    if (($form_state['input']['op'] == 'Delete')||($form_state['input']['op'] == 'Update')){
-      $form_state['ajax_commands'][] = ctools_modal_command_dismiss();
-    }
-  }
-  return $form;
 }
 
