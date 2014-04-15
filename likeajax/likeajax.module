@@ -8,7 +8,7 @@
 
 function likeajax_node_view($node, $view_mode, $langcode)
 {
-  if ($view_mode == 'full') {
+  if (($view_mode == 'full')&&(user_is_logged_in())) {
     $node->content['extra_content_button'] = drupal_get_form('likeajax_form', $node->nid);
   }
   return;
@@ -20,11 +20,9 @@ function likeajax_form($form, &$form_state, $nnid)
 
   $result = db_query("SELECT COUNT (*) FROM {likes} WHERE nid = :nid AND uid = :uid", array(':nid' => $nnid, ':uid' => $user->uid));
   $record = $result->fetchField();
-  dpm($record, 'result');
 
   $result2 = db_query("SELECT COUNT (*) FROM {likes} WHERE nid = :nid", array(':nid' => $nnid));
   $record2 = $result2->fetchField();
-  dpm($record2, 'total');
 
   $form['#prefix'] = '<div id="like-wrapper">';
   $form['#suffix'] = '</div>';
@@ -60,7 +58,6 @@ function likeajax_form($form, &$form_state, $nnid)
       'wrapper' => 'like-wrapper',
     ),
   );
-
   return $form;
 }
 function likeajax_callback($form, $form_state)
@@ -71,7 +68,6 @@ function likeajax_callback($form, $form_state)
 
 function likeajax_form_submit($form, &$form_state)
 {
-  dpm($form_state['storage']);
   if ($form_state['values']['op'] == 'LIKE') {
 
     $query = db_insert('likes')
@@ -82,7 +78,6 @@ function likeajax_form_submit($form, &$form_state)
       ->execute();
     $form_state['storage']['likesperuser'] = 1;
   } else {
-    dpm($form_state['storage']['nid'], 'dfgsxzvcv');
     $query = db_query("DELETE FROM {likes} WHERE nid = :nid AND uid = :uid", array(':nid' => $form_state['storage']['nid'], ':uid' => $form_state['storage']['uid']));
     $form_state['storage']['likesperuser'] = 0;
   }
